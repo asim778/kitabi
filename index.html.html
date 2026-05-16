@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Kitabi — Pakistan's Used Book Marketplace</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --cream:#FDF6EC;--warm:#F5E6CC;--brown:#5C3D2E;--amber:#C8860A;
+  --green:#2D6A4F;--lg:#D8F3DC;--text:#2C1A0E;--muted:#7A6652;
+  --white:#fff;--red:#C0392B;--blue:#1565C0;--border:#E8D9C5;
+}
+body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;}
+
+/* ── SHARED NAV ── */
+nav{background:var(--brown);padding:0 4%;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.25);}
+.logo{font-family:'Playfair Display',serif;font-size:1.5rem;color:#fff;cursor:pointer;letter-spacing:.5px;}
+.logo span{color:#F4C97A;}
+.nav-links{display:flex;gap:6px;align-items:center;}
+.nav-links button{background:none;border:none;color:#e8d9c5;font-size:.88rem;font-weight:500;padding:7px 13px;border-radius:8px;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.nav-links button:hover,.nav-links button.active{background:rgba(255,255,255,.12);color:#F4C97A;}
+.nav-cta{background:var(--amber)!important;color:#fff!important;border-radius:20px!important;padding:7px 16px!important;}
+.nav-cta:hover{background:#a86d08!important;}
+.nav-user{display:flex;align-items:center;gap:10px;}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--amber);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;cursor:pointer;}
+
+/* ── PAGES ── */
+.page{display:none;min-height:calc(100vh - 62px);}
+.page.active{display:block;}
+
+/* ── BUTTONS ── */
+.btn{padding:10px 22px;border-radius:24px;border:none;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.btn-amber{background:var(--amber);color:#fff;}
+.btn-amber:hover{background:#a86d08;transform:translateY(-1px);}
+.btn-brown{background:var(--brown);color:#fff;}
+.btn-brown:hover{background:#3e2010;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#1b4332;}
+.btn-outline{background:transparent;border:2px solid var(--brown);color:var(--brown);}
+.btn-outline:hover{background:var(--brown);color:#fff;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-red:hover{background:#922b21;}
+.btn-sm{padding:6px 14px;font-size:.8rem;}
+
+/* ── FORMS ── */
+.form-group{margin-bottom:18px;}
+.form-group label{display:block;font-size:.85rem;font-weight:600;color:var(--brown);margin-bottom:6px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:10px;font-size:.92rem;font-family:'Inter',sans-serif;background:#fff;color:var(--text);transition:border .2s;outline:none;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--amber);}
+.form-group textarea{resize:vertical;min-height:90px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+/* ── CARDS ── */
+.book-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 3px 14px rgba(92,61,46,.1);transition:transform .2s,box-shadow .2s;cursor:pointer;}
+.book-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(92,61,46,.18);}
+.book-cover{height:160px;display:flex;align-items:center;justify-content:center;font-size:3.2rem;position:relative;}
+.badge{position:absolute;top:10px;right:10px;padding:3px 10px;border-radius:10px;font-size:.68rem;font-weight:700;color:#fff;text-transform:uppercase;}
+.badge-new{background:#1565C0;}.badge-good{background:#2D6A4F;}.badge-fair{background:#C8860A;}
+.book-info{padding:13px;}
+.book-title{font-weight:700;font-size:.93rem;margin-bottom:3px;line-height:1.3;}
+.book-author{font-size:.78rem;color:var(--muted);margin-bottom:9px;}
+.book-footer{display:flex;justify-content:space-between;align-items:center;}
+.price{font-size:1.05rem;font-weight:700;color:var(--amber);}
+.city-tag{font-size:.72rem;color:var(--muted);background:var(--warm);padding:3px 8px;border-radius:8px;}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--brown);color:#fff;padding:12px 26px;border-radius:30px;font-size:.88rem;font-weight:600;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal{background:#fff;border-radius:20px;padding:36px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;position:relative;}
+.modal h2{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--brown);margin-bottom:20px;}
+.modal-close{position:absolute;top:16px;right:20px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);}
+
+/* ━━━━ HOME PAGE ━━━━ */
+.hero{background:linear-gradient(135deg,#3E2010,#5C3D2E,#7A5230);padding:70px 5% 60px;text-align:center;position:relative;overflow:hidden;}
+.hero-urdu{color:#F4C97A;font-size:1rem;letter-spacing:2px;margin-bottom:10px;}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,4.5vw,3.5rem);color:#fff;line-height:1.15;margin-bottom:14px;}
+.hero h1 span{color:#F4C97A;}
+.hero p{color:#D4B896;font-size:1rem;max-width:520px;margin:0 auto 30px;line-height:1.7;}
+.search-wrap{background:#fff;border-radius:50px;display:flex;align-items:center;max-width:580px;margin:0 auto 16px;box-shadow:0 8px 32px rgba(0,0,0,.3);overflow:hidden;}
+.search-wrap input{flex:1;border:none;outline:none;padding:14px 20px;font-size:.95rem;font-family:'Inter',sans-serif;}
+.search-wrap select{border:none;outline:none;padding:14px 10px;font-size:.85rem;color:var(--muted);background:transparent;border-left:1px solid #eee;}
+.search-wrap button{background:var(--amber);border:none;color:#fff;padding:14px 26px;font-size:.95rem;font-weight:600;cursor:pointer;}
+.genre-tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+.genre-tag{background:rgba(255,255,255,.12);color:#e8d9c5;padding:5px 13px;border-radius:20px;font-size:.8rem;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:background .2s;}
+.genre-tag:hover{background:rgba(255,255,255,.22);}
+.stats-bar{background:var(--amber);display:flex;justify-content:center;flex-wrap:wrap;}
+.stat{padding:18px 40px;text-align:center;border-right:1px solid rgba(255,255,255,.2);}
+.stat:last-child{border-right:none;}
+.stat-n{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#fff;}
+.stat-l{font-size:.75rem;color:rgba(255,255,255,.8);}
+.section{padding:60px 5%;}
+.sec-title{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--brown);text-align:center;margin-bottom:6px;}
+.sec-sub{color:var(--muted);text-align:center;font-size:.92rem;margin-bottom:40px;}
+.books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:20px;max-width:1100px;margin:0 auto;}
+.steps{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+.step{background:#fff;border-radius:16px;padding:30px 24px;text-align:center;flex:1;min-width:200px;max-width:260px;box-shadow:0 4px 18px rgba(92,61,46,.08);}
+.step-num{width:44px;height:44px;background:var(--amber);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;margin:0 auto 14px;}
+.step h3{font-size:1rem;color:var(--brown);margin-bottom:8px;font-weight:600;}
+.step p{color:var(--muted);font-size:.85rem;line-height:1.6;}
+.cities-grid{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;}
+.city-card-hp{background:#fff;border-radius:12px;padding:20px 28px;text-align:center;box-shadow:0 3px 14px rgba(92,61,46,.08);cursor:pointer;transition:all .2s;min-width:120px;}
+.city-card-hp:hover{background:var(--brown);color:#fff;transform:translateY(-3px);}
+.city-card-hp:hover .cc-count{color:#F4C97A;}
+.cc-icon{font-size:1.8rem;margin-bottom:6px;}
+.cc-name{font-weight:600;font-size:.9rem;}
+.cc-count{font-size:.75rem;color:var(--muted);margin-top:3px;}
+.sell-cta{background:linear-gradient(135deg,var(--green),#1B4332);padding:70px 5%;text-align:center;}
+.sell-cta h2{font-family:'Playfair Display',serif;font-size:2rem;color:#fff;margin-bottom:12px;}
+.sell-cta p{color:#B7E4C7;font-size:.95rem;max-width:480px;margin:0 auto 28px;line-height:1.7;}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+
+/* ━━━━ AUTH PAGE ━━━━ */
+.auth-page{min-height:calc(100vh - 62px);display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3E2010,#5C3D2E);padding:40px 20px;}
+.auth-box{background:#fff;border-radius:24px;padding:40px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.auth-tabs{display:flex;margin-bottom:28px;background:var(--warm);border-radius:12px;padding:4px;}
+.auth-tab{flex:1;padding:10px;border:none;background:transparent;font-size:.9rem;font-weight:600;cursor:pointer;border-radius:10px;transition:all .2s;font-family:'Inter',sans-serif;color:var(--muted);}
+.auth-tab.active{background:#fff;color:var(--brown);box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.auth-form{display:none;}
+.auth-form.active{display:block;}
+.auth-logo{font-family:'Playfair Display',serif;font-size:2rem;color:var(--brown);text-align:center;margin-bottom:6px;}
+.auth-logo span{color:var(--amber);}
+.auth-sub{text-align:center;color:var(--muted);font-size:.88rem;margin-bottom:24px;}
+.divider{text-align:center;color:var(--muted);font-size:.8rem;margin:16px 0;position:relative;}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
+.divider::before{left:0;}.divider::after{right:0;}
+
+/* ━━━━ BROWSE PAGE ━━━━ */
+.browse-layout{display:grid;grid-template-columns:260px 1fr;gap:28px;padding:32px 4%;max-width:1200px;margin:0 auto;}
+.filters-panel{background:#fff;border-radius:16px;padding:24px;box-shadow:0 3px 14px rgba(92,61,46,.08);height:fit-content;position:sticky;top:80px;}
+.filters-panel h3{font-size:1rem;font-weight:700;color:var(--brown);margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--border);}
+.filter-section{margin-bottom:20px;}
+.filter-section h4{font-size:.82rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.filter-section label{display:flex;align-items:center;gap:8px;font-size:.88rem;cursor:pointer;padding:4px 0;}
+.filter-section input[type=checkbox]{accent-color:var(--amber);width:15px;height:15px;}
+.price-range{display:flex;gap:8px;align-items:center;}
+.price-range input{width:80px;padding:7px 10px;border:2px solid var(--border);border-radius:8px;font-size:.82rem;outline:none;}
+.browse-main{}
+.browse-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:gap;}
+.result-count{font-size:.88rem;color:var(--muted);}
+.sort-select{padding:8px 12px;border:2px solid var(--border);border-radius:10px;font-size:.85rem;background:#fff;outline:none;cursor:pointer;}
+.browse-search{background:#fff;border-radius:12px;display:flex;align-items:center;gap:10px;padding:10px 16px;margin-bottom:20px;box-shadow:0 2px 10px rgba(92,61,46,.08);}
+.browse-search input{flex:1;border:none;outline:none;font-size:.95rem;font-family:'Inter',sans-serif;}
+
+/* ━━━━ BOOK DETAIL PAGE ━━━━ */
+.detail-layout{max-width:980px;margin:40px auto;padding:0 4%;display:grid;grid-template-columns:1fr 1.4fr;gap:40px;}
+.detail-cover{background:var(--warm);border-radius:20px;height:360px;display:flex;align-items:center;justify-content:center;font-size:7rem;}
+.detail-info h1{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--brown);margin-bottom:6px;}
+.detail-info .author{color:var(--muted);font-size:1rem;margin-bottom:16px;}
+.detail-price{font-size:2rem;font-weight:700;color:var(--amber);margin-bottom:16px;}
+.detail-badges{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.detail-badge{padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:600;}
+.db-condition{background:var(--lg);color:var(--green);}
+.db-city{background:var(--warm);color:var(--brown);}
+.db-genre{background:#EDE7F6;color:#5E35B1;}
+.seller-card{background:var(--cream);border-radius:14px;padding:18px;margin-bottom:20px;}
+.seller-card h4{font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;}
+.seller-info{display:flex;align-items:center;gap:12px;}
+.seller-avatar{width:44px;height:44px;border-radius:50%;background:var(--brown);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+.seller-name{font-weight:600;font-size:.95rem;}
+.seller-rating{font-size:.82rem;color:var(--muted);}
+.wa-contact{background:#25D366;color:#fff;border:none;border-radius:30px;padding:14px 28px;font-size:1rem;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;font-family:'Inter',sans-serif;transition:background .2s;}
+.wa-contact:hover{background:#1ea855;}
+.detail-desc{font-size:.9rem;color:var(--muted);line-height:1.7;margin-bottom:20px;}
+
+/* ━━━━ SELL PAGE ━━━━ */
+.sell-layout{max-width:680px;margin:40px auto;padding:0 4%;}
+.sell-layout h1{font-family:'Playfair Display',serif;font-size:2rem;color:var(--brown);margin-bottom:6px;}
+.sell-layout p{color:var(--muted);margin-bottom:30px;font-size:.92rem;}
+.sell-card{background:#fff;border-radius:18px;padding:32px;box-shadow:0 4px 20px rgba(92,61,46,.1);}
+.cover-picker{border:2px dashed var(--border);border-radius:14px;padding:40px;text-align:center;margin-bottom:18px;cursor:pointer;transition:border .2s;background:var(--cream);}
+.cover-picker:hover{border-color:var(--amber);}
+.cover-picker .icon{font-size:2.5rem;margin-bottom:8px;}
+.cover-picker p{color:var(--muted);font-size:.85rem;}
+.emoji-picker{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;justify-content:center;}
+.ep-btn{font-size:1.8rem;border:2px solid transparent;border-radius:10px;padding:6px;cursor:pointer;background:var(--warm);transition:border .2s;}
+.ep-btn.selected,.ep-btn:hover{border-color:var(--amber);}
+
+/* ━━━━ DASHBOARD PAGE ━━━━ */
+.dash-layout{max-width:1100px;margin:0 auto;padding:32px 4%;}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px;flex-wrap:wrap;gap:16px;}
+.dash-header h1{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--brown);}
+.dash-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:30px;}
+.ds-card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 3px 12px rgba(92,61,46,.08);}
+.ds-num{font-size:1.8rem;font-weight:700;color:var(--amber);font-family:'Playfair Display',serif;}
+.ds-label{font-size:.8rem;color:var(--muted);margin-top:4px;}
+.dash-tabs{display:flex;gap:6px;margin-bottom:24px;border-bottom:2px solid var(--border);padding-bottom:0;}
+.dash-tab{padding:10px 18px;border:none;background:none;font-size:.88rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;font-family:'Inter',sans-serif;transition:all .2s;}
+.dash-tab.active{color:var(--amber);border-bottom-color:var(--amber);}
+.listing-row{background:#fff;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(92,61,46,.07);}
+.lr-cover{font-size:2rem;width:48px;text-align:center;}
+.lr-info{flex:1;}
+.lr-title{font-weight:600;font-size:.93rem;}
+.lr-meta{font-size:.78rem;color:var(--muted);margin-top:3px;}
+.lr-price{font-weight:700;color:var(--amber);font-size:1rem;margin-right:12px;}
+.lr-status{padding:3px 10px;border-radius:10px;font-size:.72rem;font-weight:700;}
+.status-active{background:var(--lg);color:var(--green);}
+.status-sold{background:#FDECEA;color:var(--red);}
+.status-pending{background:#FFF3E0;color:#E65100;}
+.lr-actions{display:flex;gap:6px;}
+
+/* ━━━━ ADMIN PAGE ━━━━ */
+.admin-layout{max-width:1100px;margin:0 auto;padding:28px 4%;}
+.admin-header{background:var(--brown);color:#fff;padding:20px 24px;border-radius:16px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;}
+.admin-header h1{font-family:'Playfair Display',serif;font-size:1.5rem;}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px;}
+.ag-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 3px 12px rgba(92,61,46,.08);text-align:center;}
+.ag-num{font-size:1.8rem;font-weight:700;font-family:'Playfair Display',serif;}
+.ag-label{font-size:.78rem;color:var(--muted);margin-top:4px;}
+.admin-tabs{display:flex;gap:6px;margin-bottom:20px;}
+.admin-tab{padding:9px 18px;border:2px solid var(--border);background:#fff;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;color:var(--muted);}
+.admin-tab.active{background:var(--brown);color:#fff;border-color:var(--brown);}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 3px 14px rgba(92,61,46,.08);}
+thead{background:var(--warm);}
+th{padding:12px 16px;text-align:left;font-size:.8rem;font-weight:700;color:var(--brown);text-transform:uppercase;letter-spacing:.4px;}
+td{padding:12px 16px;font-size:.88rem;border-top:1px solid var(--border);}
+tr:hover td{background:var(--cream);}
+.tbl-action{display:flex;gap:6px;}
+
+/* ━━━━ FOOTER ━━━━ */
+footer{background:var(--brown);padding:40px 5% 20px;color:#D4B896;margin-top:60px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:32px;margin-bottom:32px;}
+.footer-brand .logo{font-size:1.4rem;display:block;margin-bottom:10px;}
+.footer-brand p{font-size:.82rem;line-height:1.7;color:#B89A7E;}
+.footer-col h4{color:#F4C97A;font-size:.85rem;margin-bottom:12px;font-weight:700;}
+.footer-col ul{list-style:none;}
+.footer-col ul li{margin-bottom:7px;font-size:.82rem;color:#B89A7E;cursor:pointer;}
+.footer-col ul li:hover{color:#F4C97A;}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:18px;text-align:center;font-size:.78rem;color:#8A6E57;}
+
+/* ── WA FAB ── */
+.wa-fab{position:fixed;bottom:24px;right:24px;background:#25D366;color:#fff;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 16px rgba(37,211,102,.4);cursor:pointer;z-index:900;transition:transform .2s;}
+.wa-fab:hover{transform:scale(1.1);}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty .e-icon{font-size:3rem;margin-bottom:14px;}
+.empty p{font-size:.95rem;}
+
+@media(max-width:768px){
+  .browse-layout{grid-template-columns:1fr;}
+  .filters-panel{position:static;}
+  .detail-layout{grid-template-columns:1fr;}
+  .footer-grid{grid-template-columns:1fr;}
+  nav .nav-links button:not(.nav-cta){display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="logo" onclick="showPage('home')">کتابی <span>Kitabi</span></div>
+  <div class="nav-links" id="navLinks">
+    <button onclick="showPage('home')">Home</button>
+    <button onclick="showPage('browse')">Browse</button>
+    <button onclick="requireAuth('sell')" class="nav-cta">+ Sell a Book</button>
+    <button onclick="requireAuth('dashboard')" id="dashBtn" style="display:none">Dashboard</button>
+    <button onclick="requireAuth('admin')" id="adminBtn" style="display:none">Admin</button>
+    <button onclick="showPage('auth')" id="loginBtn">Login</button>
+    <div class="avatar" id="avatarBtn" style="display:none" onclick="showPage('dashboard')"></div>
+    <button onclick="logout()" id="logoutBtn" style="display:none">Logout</button>
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ══════════════════════════
+     HOME PAGE
+══════════════════════════ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-urdu">پاکستان کا سب سے بڑا پرانی کتابوں کا بازار</div>
+    <h1>Pakistan's Home for<br/><span>Used Books</span></h1>
+    <p>Buy and sell secondhand books across Pakistan — affordable reads, trusted sellers, cash on delivery.</p>
+    <div class="search-wrap">
+      <input type="text" id="heroSearch" placeholder="Search by title, author, subject…"/>
+      <select id="heroCity">
+        <option value="">All Cities</option>
+        <option>Lahore</option><option>Karachi</option><option>Islamabad</option>
+        <option>Rawalpindi</option><option>Peshawar</option><option>Faisalabad</option>
+      </select>
+      <button onclick="doHeroSearch()">Search</button>
+    </div>
+    <div class="genre-tags">
+      <button class="genre-tag" onclick="browseGenre('Textbooks')">📚 Textbooks</button>
+      <button class="genre-tag" onclick="browseGenre('Fiction')">📖 Fiction</button>
+      <button class="genre-tag" onclick="browseGenre('Self-Help')">🧠 Self-Help</button>
+      <button class="genre-tag" onclick="browseGenre('Islamic')">🕌 Islamic</button>
+      <button class="genre-tag" onclick="browseGenre('Urdu Adab')">🗣️ Urdu Adab</button>
+      <button class="genre-tag" onclick="browseGenre('Science')">🔬 Science</button>
+    </div>
+  </div>
+
+  <div class="stats-bar" id="homeStats"></div>
+
+  <section class="section">
+    <div class="sec-title">Recent Listings</div>
+    <div class="sec-sub">Fresh books added by sellers across Pakistan</div>
+    <div class="books-grid" id="homeListings"></div>
+    <div style="text-align:center;margin-top:28px;">
+      <button class="btn btn-amber" onclick="showPage('browse')">View All Books →</button>
+    </div>
+  </section>
+
+  <section class="section" style="background:var(--warm);padding:60px 5%;">
+    <div class="sec-title">How Kitabi Works</div>
+    <div class="sec-sub">Three simple steps to buy or sell</div>
+    <div class="steps">
+      <div class="step"><div style="font-size:2rem;margin-bottom:8px;">📸</div><div class="step-num">1</div><h3>List Your Book</h3><p>Post a listing in 2 minutes. Free for the first 5 books.</p></div>
+      <div class="step"><div style="font-size:2rem;margin-bottom:8px;">🔍</div><div class="step-num">2</div><h3>Discover & Connect</h3><p>Browse thousands of listings. Chat via WhatsApp.</p></div>
+      <div class="step"><div style="font-size:2rem;margin-bottom:8px;">📦</div><div class="step-num">3</div><h3>Buy with Confidence</h3><p>Cash on delivery. Seller trust scores protect every deal.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sec-title">Browse by City</div>
+    <div class="sec-sub">Find books listed near you</div>
+    <div class="cities-grid" id="citiesGrid"></div>
+  </section>
+
+  <div class="sell-cta">
+    <h2>Have books collecting dust?</h2>
+    <p>List your old textbooks, novels, or your bookshop's inventory on Kitabi and reach buyers across Pakistan.</p>
+    <div class="cta-btns">
+      <button class="btn btn-amber" onclick="requireAuth('sell')">📸 List a Book Free</button>
+      <button class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.5);" onclick="toast('Shop onboarding coming soon!')">🏪 Onboard Your Shop</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <span class="logo">کتابی <span style="color:#F4C97A;">Kitabi</span></span>
+        <p>Pakistan's first peer-to-peer used book marketplace. Making quality reading affordable for every student and book lover.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Browse</h4>
+        <ul>
+          <li onclick="browseGenre('Textbooks')">Textbooks</li>
+          <li onclick="browseGenre('Fiction')">Fiction & Novels</li>
+          <li onclick="browseGenre('Urdu Adab')">Urdu Adab</li>
+          <li onclick="browseGenre('Islamic')">Islamic Books</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Sell</h4>
+        <ul>
+          <li onclick="requireAuth('sell')">List a Book</li>
+          <li onclick="toast('Guide coming soon!')">Seller Guide</li>
+          <li onclick="toast('Coming soon!')">Bookshop Onboarding</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025–26 Kitabi · FYP BBA · SDG 4 & 12</div>
+  </footer>
+</div>
+
+<!-- ══════════════════════════
+     AUTH PAGE
+══════════════════════════ -->
+<div id="page-auth" class="page">
+  <div class="auth-page">
+    <div class="auth-box">
+      <div class="auth-logo">کتابی <span>Kitabi</span></div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuth('login')">Login</button>
+        <button class="auth-tab" onclick="switchAuth('signup')">Sign Up</button>
+      </div>
+
+      <div class="auth-form active" id="loginForm">
+        <div class="auth-sub">Welcome back! Login to your account</div>
+        <div class="form-group"><label>Email</label><input type="email" id="lEmail" placeholder="you@example.com"/></div>
+        <div class="form-group"><label>Password</label><input type="password" id="lPass" placeholder="••••••••"/></div>
+        <button class="btn btn-amber" style="width:100%;padding:13px;" onclick="doLogin()">Login</button>
+        <div class="divider">or</div>
+        <button class="btn btn-outline" style="width:100%;padding:12px;" onclick="demoLogin('buyer')">Demo as Buyer</button>
+        <button class="btn btn-outline" style="width:100%;padding:12px;margin-top:8px;" onclick="demoLogin('admin')">Demo as Admin</button>
+      </div>
+
+      <div class="auth-form" id="signupForm">
+        <div class="auth-sub">Create your Kitabi account</div>
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" id="sFirst" placeholder="Ali"/></div>
+          <div class="form-group"><label>Last Name</label><input type="text" id="sLast" placeholder="Ahmed"/></div>
+        </div>
+        <div class="form-group"><label>Email</label><input type="email" id="sEmail" placeholder="you@example.com"/></div>
+        <div class="form-group"><label>Phone (for WhatsApp)</label><input type="tel" id="sPhone" placeholder="03XX-XXXXXXX"/></div>
+        <div class="form-group"><label>City</label>
+          <select id="sCity"><option value="">Select city</option><option>Lahore</option><option>Karachi</option><option>Islamabad</option><option>Rawalpindi</option><option>Peshawar</option><option>Faisalabad</option></select>
+        </div>
+        <div class="form-group"><label>Password</label><input type="password" id="sPass" placeholder="Min 6 characters"/></div>
+        <button class="btn btn-amber" style="width:100%;padding:13px;" onclick="doSignup()">Create Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     BROWSE PAGE
+══════════════════════════ -->
+<div id="page-browse" class="page">
+  <div class="browse-layout">
+    <div class="filters-panel">
+      <h3>🔍 Filters</h3>
+      <div class="filter-section">
+        <h4>City</h4>
+        <label><input type="checkbox" value="Lahore" class="f-city" onchange="applyFilters()"> Lahore</label>
+        <label><input type="checkbox" value="Karachi" class="f-city" onchange="applyFilters()"> Karachi</label>
+        <label><input type="checkbox" value="Islamabad" class="f-city" onchange="applyFilters()"> Islamabad</label>
+        <label><input type="checkbox" value="Rawalpindi" class="f-city" onchange="applyFilters()"> Rawalpindi</label>
+        <label><input type="checkbox" value="Peshawar" class="f-city" onchange="applyFilters()"> Peshawar</label>
+        <label><input type="checkbox" value="Faisalabad" class="f-city" onchange="applyFilters()"> Faisalabad</label>
+      </div>
+      <div class="filter-section">
+        <h4>Genre</h4>
+        <label><input type="checkbox" value="Textbooks" class="f-genre" onchange="applyFilters()"> Textbooks</label>
+        <label><input type="checkbox" value="Fiction" class="f-genre" onchange="applyFilters()"> Fiction</label>
+        <label><input type="checkbox" value="Urdu Adab" class="f-genre" onchange="applyFilters()"> Urdu Adab</label>
+        <label><input type="checkbox" value="Islamic" class="f-genre" onchange="applyFilters()"> Islamic</label>
+        <label><input type="checkbox" value="Self-Help" class="f-genre" onchange="applyFilters()"> Self-Help</label>
+        <label><input type="checkbox" value="Science" class="f-genre" onchange="applyFilters()"> Science</label>
+        <label><input type="checkbox" value="History" class="f-genre" onchange="applyFilters()"> History</label>
+        <label><input type="checkbox" value="Children" class="f-genre" onchange="applyFilters()"> Children</label>
+      </div>
+      <div class="filter-section">
+        <h4>Condition</h4>
+        <label><input type="checkbox" value="Like New" class="f-cond" onchange="applyFilters()"> Like New</label>
+        <label><input type="checkbox" value="Good" class="f-cond" onchange="applyFilters()"> Good</label>
+        <label><input type="checkbox" value="Fair" class="f-cond" onchange="applyFilters()"> Fair</label>
+      </div>
+      <div class="filter-section">
+        <h4>Price Range (PKR)</h4>
+        <div class="price-range">
+          <input type="number" id="minPrice" placeholder="Min" onchange="applyFilters()"/>
+          <span>–</span>
+          <input type="number" id="maxPrice" placeholder="Max" onchange="applyFilters()"/>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm" style="width:100%;margin-top:8px;" onclick="clearFilters()">Clear Filters</button>
+    </div>
+
+    <div class="browse-main">
+      <div class="browse-search">
+        <span>🔍</span>
+        <input type="text" id="browseSearch" placeholder="Search titles, authors…" oninput="applyFilters()"/>
+      </div>
+      <div class="browse-top">
+        <span class="result-count" id="resultCount">0 books found</span>
+        <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+          <option value="newest">Newest First</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+        </select>
+      </div>
+      <div class="books-grid" id="browseGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     BOOK DETAIL PAGE
+══════════════════════════ -->
+<div id="page-detail" class="page">
+  <div style="padding:20px 4%;max-width:980px;margin:0 auto;">
+    <button class="btn btn-outline btn-sm" onclick="goBack()">← Back</button>
+  </div>
+  <div class="detail-layout" id="detailContent"></div>
+</div>
+
+<!-- ══════════════════════════
+     SELL PAGE
+══════════════════════════ -->
+<div id="page-sell" class="page">
+  <div class="sell-layout">
+    <h1>List a Book</h1>
+    <p>Fill in the details below. Your listing will go live immediately.</p>
+    <div class="sell-card">
+      <div class="form-group">
+        <label>Book Cover Icon</label>
+        <div class="emoji-picker" id="emojiPicker">
+          <button class="ep-btn selected" data-e="📚">📚</button>
+          <button class="ep-btn" data-e="📖">📖</button>
+          <button class="ep-btn" data-e="📕">📕</button>
+          <button class="ep-btn" data-e="📗">📗</button>
+          <button class="ep-btn" data-e="📘">📘</button>
+          <button class="ep-btn" data-e="📙">📙</button>
+          <button class="ep-btn" data-e="📒">📒</button>
+          <button class="ep-btn" data-e="📓">📓</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Book Title *</label><input type="text" id="sTitle" placeholder="e.g. Calculus by Stewart"/></div>
+        <div class="form-group"><label>Author *</label><input type="text" id="sAuthor" placeholder="e.g. James Stewart"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Genre *</label>
+          <select id="sGenre">
+            <option value="">Select genre</option>
+            <option>Textbooks</option><option>Fiction</option><option>Urdu Adab</option>
+            <option>Islamic</option><option>Self-Help</option><option>Science</option>
+            <option>History</option><option>Children</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Language</label>
+          <select id="sLang">
+            <option>English</option><option>Urdu</option><option>Both</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Condition *</label>
+          <select id="sCond">
+            <option value="">Select condition</option>
+            <option>Like New</option><option>Good</option><option>Fair</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Price (PKR) *</label><input type="number" id="sPrice" placeholder="e.g. 350"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>City *</label>
+          <select id="sSellCity">
+            <option value="">Select city</option>
+            <option>Lahore</option><option>Karachi</option><option>Islamabad</option>
+            <option>Rawalpindi</option><option>Peshawar</option><option>Faisalabad</option>
+          </select>
+        </div>
+        <div class="form-group"><label>WhatsApp Number</label><input type="tel" id="sWA" placeholder="03XX-XXXXXXX"/></div>
+      </div>
+      <div class="form-group"><label>Description</label><textarea id="sDesc" placeholder="Describe the book's condition, any notes, edition, etc."></textarea></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn btn-amber" onclick="submitListing()">🚀 Post Listing</button>
+        <button class="btn btn-outline" onclick="showPage('home')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     DASHBOARD PAGE
+══════════════════════════ -->
+<div id="page-dashboard" class="page">
+  <div class="dash-layout">
+    <div class="dash-header">
+      <div>
+        <h1 id="dashTitle">My Dashboard</h1>
+        <p style="color:var(--muted);font-size:.88rem;" id="dashSub">Manage your listings and track sales</p>
+      </div>
+      <button class="btn btn-amber" onclick="requireAuth('sell')">+ New Listing</button>
+    </div>
+    <div class="dash-stats" id="dashStats"></div>
+    <div class="dash-tabs">
+      <button class="dash-tab active" onclick="switchDashTab('listings',this)">My Listings</button>
+      <button class="dash-tab" onclick="switchDashTab('profile',this)">Profile</button>
+    </div>
+    <div id="dashContent"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     ADMIN PAGE
+══════════════════════════ -->
+<div id="page-admin" class="page">
+  <div class="admin-layout">
+    <div class="admin-header">
+      <h1>🛡️ Admin Panel</h1>
+      <span style="font-size:.85rem;opacity:.8;">Kitabi Management Console</span>
+    </div>
+    <div class="admin-grid" id="adminStats"></div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('listings',this)">All Listings</button>
+      <button class="admin-tab" onclick="switchAdminTab('users',this)">Users</button>
+      <button class="admin-tab" onclick="switchAdminTab('revenue',this)">Revenue</button>
+    </div>
+    <div id="adminContent"></div>
+  </div>
+</div>
+
+<!-- WA FAB -->
+<div class="wa-fab" title="WhatsApp Support" onclick="toast('WhatsApp: +92 300 0000000')">💬</div>
+
+<script>
+// ══════════════════════════════════════
+//  DATA STORE  (localStorage)
+// ══════════════════════════════════════
+const BOOKS_KEY='kitabi_books', USERS_KEY='kitabi_users', SESS_KEY='kitabi_session';
+
+const COVERS=['📚','📖','📕','📗','📘','📙','📒','📓'];
+const COVER_BG=['#FDE8C8','#E8F4FD','#F0E8FD','#E8FDE8','#FDE8E8','#FDF8E8','#E8FDFD','#FCE8FD'];
+
+function getBooks(){return JSON.parse(localStorage.getItem(BOOKS_KEY)||'[]');}
+function saveBooks(b){localStorage.setItem(BOOKS_KEY,JSON.stringify(b));}
+function getUsers(){return JSON.parse(localStorage.getItem(USERS_KEY)||'[]');}
+function saveUsers(u){localStorage.setItem(USERS_KEY,JSON.stringify(u));}
+function getSession(){return JSON.parse(localStorage.getItem(SESS_KEY)||'null');}
+function saveSession(s){localStorage.setItem(SESS_KEY,JSON.stringify(s));}
+
+// Seed default data
+function seedData(){
+  if(getBooks().length>0)return;
+  const books=[
+    {id:1,title:'Calculus by Stewart',author:'James Stewart',genre:'Textbooks',lang:'English',cond:'Like New',price:650,city:'Lahore',emoji:'📘',bg:'#E8F4FD',desc:'8th edition, barely used. Great condition.',wa:'03001234567',sellerId:'demo1',sellerName:'Ahmed Raza',date:Date.now()-86400000*2,status:'active'},
+    {id:2,title:'The Alchemist',author:'Paulo Coelho',genre:'Fiction',lang:'English',cond:'Good',price:200,city:'Karachi',emoji:'📗',bg:'#E8FDE8',desc:'Classic novel, minor wear on cover.',wa:'03011234567',sellerId:'demo1',sellerName:'Ahmed Raza',date:Date.now()-86400000*3,status:'active'},
+    {id:3,title:'Aag ka Darya',author:'Qurratulain Hyder',genre:'Urdu Adab',lang:'Urdu',cond:'Good',price:300,city:'Lahore',emoji:'📕',bg:'#FDE8E8',desc:'Urdu literary classic. Good condition.',wa:'03021234567',sellerId:'demo2',sellerName:'Sara Khan',date:Date.now()-86400000,status:'active'},
+    {id:4,title:'Atomic Habits',author:'James Clear',genre:'Self-Help',lang:'English',cond:'Like New',price:400,city:'Rawalpindi',emoji:'📙',bg:'#FDE8C8',desc:'Read once, like new. Highly recommended.',wa:'03031234567',sellerId:'demo2',sellerName:'Sara Khan',date:Date.now()-86400000*5,status:'active'},
+    {id:5,title:'Physics 12th Grade',author:'Punjab Textbook Board',genre:'Textbooks',lang:'Urdu',cond:'Fair',price:120,city:'Faisalabad',emoji:'📓',bg:'#FDF8E8',desc:'2022 edition. Some pencil marks.',wa:'03041234567',sellerId:'demo3',sellerName:'Bilal Hussain',date:Date.now()-86400000*7,status:'active'},
+    {id:6,title:'Khuda aur Mohabbat',author:'Hashim Nadeem',genre:'Urdu Adab',lang:'Urdu',cond:'Like New',price:450,city:'Peshawar',emoji:'📚',bg:'#FCE8FD',desc:'All 3 parts. Original prints.',wa:'03051234567',sellerId:'demo3',sellerName:'Bilal Hussain',date:Date.now()-86400000*4,status:'active'},
+    {id:7,title:'Rich Dad Poor Dad',author:'Robert Kiyosaki',genre:'Self-Help',lang:'English',cond:'Good',price:350,city:'Karachi',emoji:'📔',bg:'#E8FDFD',desc:'Good condition, some highlights.',wa:'03061234567',sellerId:'demo4',sellerName:'Fatima Malik',date:Date.now()-3600000*5,status:'active'},
+    {id:8,title:'Urdu Grammar',author:'Prof. Fateh Ullah',genre:'Textbooks',lang:'Urdu',cond:'Fair',price:150,city:'Islamabad',emoji:'📒',bg:'#E8FDE8',desc:'Standard grammar reference.',wa:'03071234567',sellerId:'demo4',sellerName:'Fatima Malik',date:Date.now()-3600000*2,status:'active'},
+    {id:9,title:'Islamic Studies',author:'Various Authors',genre:'Islamic',lang:'Urdu',cond:'Good',price:250,city:'Lahore',emoji:'📘',bg:'#E8F4FD',desc:'Comprehensive Islamic studies book.',wa:'03081234567',sellerId:'demo5',sellerName:'Usman Ali',date:Date.now()-86400000*6,status:'active'},
+    {id:10,title:'Biology FSc Part 2',author:'Punjab Textbook Board',genre:'Textbooks',lang:'English',cond:'Good',price:180,city:'Lahore',emoji:'📗',bg:'#E8FDE8',desc:'Good condition, no missing pages.',wa:'03091234567',sellerId:'demo5',sellerName:'Usman Ali',date:Date.now()-3600000*10,status:'active'},
+  ];
+  saveBooks(books);
+
+  const users=[
+    {id:'admin',email:'admin@kitabi.pk',pass:'admin123',name:'Admin User',city:'Lahore',phone:'03001111111',role:'admin'},
+    {id:'demo1',email:'ahmed@demo.com',pass:'demo123',name:'Ahmed Raza',city:'Lahore',phone:'03001234567',role:'seller'},
+    {id:'demo2',email:'sara@demo.com',pass:'demo123',name:'Sara Khan',city:'Karachi',phone:'03011234567',role:'seller'},
+  ];
+  saveUsers(users);
+}
+
+// ══════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════
+let prevPage='home';
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  const pg=document.getElementById('page-'+p);
+  if(pg){pg.classList.add('active');window.scrollTo(0,0);}
+  prevPage=p;
+  renderPage(p);
+}
+function goBack(){showPage('browse');}
+function renderPage(p){
+  if(p==='home')renderHome();
+  else if(p==='browse')renderBrowse();
+  else if(p==='dashboard')renderDashboard();
+  else if(p==='admin')renderAdmin();
+}
+
+// ══════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════
+function requireAuth(dest){
+  const s=getSession();
+  if(s){showPage(dest);}
+  else{window._authDest=dest;showPage('auth');}
+}
+function switchAuth(tab){
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',['login','signup'][i]===tab));
+  document.getElementById('loginForm').classList.toggle('active',tab==='login');
+  document.getElementById('signupForm').classList.toggle('active',tab==='signup');
+}
+function doLogin(){
+  const email=document.getElementById('lEmail').value.trim();
+  const pass=document.getElementById('lPass').value;
+  const users=getUsers();
+  const u=users.find(x=>x.email===email&&x.pass===pass);
+  if(!u){toast('Invalid email or password');return;}
+  saveSession(u);updateNav();
+  toast('Welcome back, '+u.name.split(' ')[0]+'! 👋');
+  showPage(window._authDest||'home');
+}
+function doSignup(){
+  const first=document.getElementById('sFirst').value.trim();
+  const last=document.getElementById('sLast').value.trim();
+  const email=document.getElementById('sEmail').value.trim();
+  const phone=document.getElementById('sPhone').value.trim();
+  const city=document.getElementById('sCity').value;
+  const pass=document.getElementById('sPass').value;
+  if(!first||!email||!pass||!city){toast('Please fill all required fields');return;}
+  if(pass.length<6){toast('Password must be at least 6 characters');return;}
+  const users=getUsers();
+  if(users.find(x=>x.email===email)){toast('Email already registered');return;}
+  const u={id:'u'+Date.now(),email,pass,name:first+' '+last,city,phone,role:'seller'};
+  users.push(u);saveUsers(users);saveSession(u);updateNav();
+  toast('Account created! Welcome, '+first+'! 🎉');
+  showPage(window._authDest||'home');
+}
+function demoLogin(role){
+  const users=getUsers();
+  const u=role==='admin'?users.find(x=>x.role==='admin'):users.find(x=>x.role==='seller');
+  if(u){saveSession(u);updateNav();toast('Demo login: '+u.name);showPage(role==='admin'?'admin':'dashboard');}
+}
+function logout(){
+  localStorage.removeItem(SESS_KEY);updateNav();toast('Logged out.');showPage('home');
+}
+function updateNav(){
+  const s=getSession();
+  document.getElementById('loginBtn').style.display=s?'none':'';
+  document.getElementById('logoutBtn').style.display=s?'':'none';
+  document.getElementById('avatarBtn').style.display=s?'':'none';
+  document.getElementById('dashBtn').style.display=s?'':'none';
+  document.getElementById('adminBtn').style.display=(s&&s.role==='admin')?'':'none';
+  if(s){const a=document.getElementById('avatarBtn');a.textContent=s.name[0].toUpperCase();}
+}
+
+// ══════════════════════════════════════
+//  HOME PAGE
+// ══════════════════════════════════════
+function renderHome(){
+  const books=getBooks().filter(b=>b.status==='active');
+  // stats
+  const cities=[...new Set(books.map(b=>b.city))].length;
+  document.getElementById('homeStats').innerHTML=`
+    <div class="stat"><div class="stat-n">${books.length}+</div><div class="stat-l">Books Listed</div></div>
+    <div class="stat"><div class="stat-n">${getUsers().filter(u=>u.role!=='admin').length}+</div><div class="stat-l">Active Sellers</div></div>
+    <div class="stat"><div class="stat-n">${cities}</div><div class="stat-l">Cities Covered</div></div>
+    <div class="stat"><div class="stat-n">60–70%</div><div class="stat-l">Avg. Savings</div></div>`;
+  // recent books
+  const recent=books.sort((a,b)=>b.date-a.date).slice(0,8);
+  document.getElementById('homeListings').innerHTML=recent.map(bookCardHTML).join('');
+  // cities
+  const cityData=[
+    {name:'Lahore',icon:'🕌'},{name:'Karachi',icon:'🌊'},{name:'Islamabad',icon:'🏛️'},
+    {name:'Rawalpindi',icon:'📡'},{name:'Peshawar',icon:'⛰️'},{name:'Faisalabad',icon:'🎓'}
+  ];
+  document.getElementById('citiesGrid').innerHTML=cityData.map(c=>{
+    const cnt=books.filter(b=>b.city===c.name).length;
+    return`<div class="city-card-hp" onclick="browseCity('${c.name}')"><div class="cc-icon">${c.icon}</div><div class="cc-name">${c.name}</div><div class="cc-count">${cnt} books</div></div>`;
+  }).join('');
+}
+
+function bookCardHTML(b){
+  const cmap={'Like New':'like-new badge-new','Good':'good badge-good','Fair':'fair badge-fair'};
+  return`<div class="book-card" onclick="openBook(${b.id})">
+    <div class="book-cover" style="background:${b.bg||COVER_BG[0]}">${b.emoji||'📚'}<span class="badge ${cmap[b.cond]||''}">${b.cond}</span></div>
+    <div class="book-info">
+      <div class="book-title">${b.title}</div>
+      <div class="book-author">${b.author}</div>
+      <div class="book-footer"><span class="price">PKR ${b.price}</span><span class="city-tag">📍 ${b.city}</span></div>
+    </div>
+  </div>`;
+}
+
+function doHeroSearch(){
+  const q=document.getElementById('heroSearch').value.trim();
+  const c=document.getElementById('heroCity').value;
+  window._browseSearch=q;window._browseCity=c;
+  showPage('browse');
+}
+function browseGenre(g){window._browseGenre=g;showPage('browse');}
+function browseCity(c){window._browseCity=c;showPage('browse');}
+
+// ══════════════════════════════════════
+//  BROWSE PAGE
+// ══════════════════════════════════════
+function renderBrowse(){
+  // apply pre-filters from homepage
+  if(window._browseSearch){document.getElementById('browseSearch').value=window._browseSearch;window._browseSearch=null;}
+  if(window._browseCity){
+    document.querySelectorAll('.f-city').forEach(cb=>{cb.checked=cb.value===window._browseCity;});
+    window._browseCity=null;
+  }
+  if(window._browseGenre){
+    document.querySelectorAll('.f-genre').forEach(cb=>{cb.checked=cb.value===window._browseGenre;});
+    window._browseGenre=null;
+  }
+  applyFilters();
+}
+function applyFilters(){
+  let books=getBooks().filter(b=>b.status==='active');
+  const cities=[...document.querySelectorAll('.f-city:checked')].map(c=>c.value);
+  const genres=[...document.querySelectorAll('.f-genre:checked')].map(c=>c.value);
+  const conds=[...document.querySelectorAll('.f-cond:checked')].map(c=>c.value);
+  const minP=parseInt(document.getElementById('minPrice')?.value)||0;
+  const maxP=parseInt(document.getElementById('maxPrice')?.value)||999999;
+  const q=(document.getElementById('browseSearch')?.value||'').toLowerCase();
+  const sort=document.getElementById('sortSelect')?.value||'newest';
+
+  if(cities.length)books=books.filter(b=>cities.includes(b.city));
+  if(genres.length)books=books.filter(b=>genres.includes(b.genre));
+  if(conds.length)books=books.filter(b=>conds.includes(b.cond));
+  books=books.filter(b=>b.price>=minP&&b.price<=maxP);
+  if(q)books=books.filter(b=>b.title.toLowerCase().includes(q)||b.author.toLowerCase().includes(q));
+  if(sort==='price-asc')books.sort((a,b)=>a.price-b.price);
+  else if(sort==='price-desc')books.sort((a,b)=>b.price-a.price);
+  else books.sort((a,b)=>b.date-a.date);
+
+  document.getElementById('resultCount').textContent=`${books.length} book${books.length!==1?'s':''} found`;
+  document.getElementById('browseGrid').innerHTML=books.length?books.map(bookCardHTML).join(''):`<div class="empty" style="grid-column:1/-1"><div class="e-icon">🔍</div><p>No books match your filters.</p></div>`;
+}
+function clearFilters(){
+  document.querySelectorAll('.f-city,.f-genre,.f-cond').forEach(c=>c.checked=false);
+  document.getElementById('minPrice').value='';
+  document.getElementById('maxPrice').value='';
+  document.getElementById('browseSearch').value='';
+  document.getElementById('sortSelect').value='newest';
+  applyFilters();
+}
+
+// ══════════════════════════════════════
+//  BOOK DETAIL
+// ══════════════════════════════════════
+function openBook(id){
+  const b=getBooks().find(x=>x.id===id);
+  if(!b)return;
+  document.getElementById('detailContent').innerHTML=`
+    <div>
+      <div class="detail-cover" style="background:${b.bg||COVER_BG[0]}">${b.emoji||'📚'}</div>
+    </div>
+    <div class="detail-info">
+      <h1>${b.title}</h1>
+      <div class="author">by ${b.author}</div>
+      <div class="detail-price">PKR ${b.price}</div>
+      <div class="detail-badges">
+        <span class="detail-badge db-condition">📦 ${b.cond}</span>
+        <span class="detail-badge db-city">📍 ${b.city}</span>
+        <span class="detail-badge db-genre">📚 ${b.genre}</span>
+        <span class="detail-badge" style="background:#FFF3E0;color:#E65100;">🌐 ${b.lang}</span>
+      </div>
+      <div class="seller-card">
+        <h4>Listed by</h4>
+        <div class="seller-info">
+          <div class="seller-avatar">${(b.sellerName||'S')[0]}</div>
+          <div><div class="seller-name">${b.sellerName||'Seller'}</div><div class="seller-rating">⭐⭐⭐⭐⭐ Verified Seller · ${b.city}</div></div>
+        </div>
+      </div>
+      <p class="detail-desc">${b.desc||'No description provided.'}</p>
+      <button class="wa-contact" onclick="contactWhatsApp('${b.wa}','${b.title}',${b.price})">💬 Contact via WhatsApp</button>
+      <button class="btn btn-outline" style="width:100%;" onclick="goBack()">← Back to Listings</button>
+    </div>`;
+  showPage('detail');
+}
+function contactWhatsApp(num,title,price){
+  const msg=encodeURIComponent(`Hi! I found your listing on Kitabi for "${title}" at PKR ${price}. Is it still available?`);
+  window.open(`https://wa.me/92${num.replace(/^0/,'')}?text=${msg}`,'_blank');
+}
+
+// ══════════════════════════════════════
+//  SELL / LIST BOOK
+// ══════════════════════════════════════
+let selectedEmoji='📚';
+document.querySelectorAll('.ep-btn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.ep-btn').forEach(b=>b.classList.remove('selected'));
+    this.classList.add('selected');selectedEmoji=this.dataset.e;
+  });
+});
+function submitListing(){
+  const s=getSession();if(!s){requireAuth('sell');return;}
+  const title=document.getElementById('sTitle').value.trim();
+  const author=document.getElementById('sAuthor').value.trim();
+  const genre=document.getElementById('sGenre').value;
+  const lang=document.getElementById('sLang').value;
+  const cond=document.getElementById('sCond').value;
+  const price=parseInt(document.getElementById('sPrice').value);
+  const city=document.getElementById('sSellCity').value;
+  const wa=document.getElementById('sWA').value.trim()||s.phone||'03000000000';
+  const desc=document.getElementById('sDesc').value.trim();
+  if(!title||!author||!genre||!cond||!price||!city){toast('Please fill all required fields');return;}
+  const books=getBooks();
+  const eidx=COVERS.indexOf(selectedEmoji);
+  const b={
+    id:Date.now(),title,author,genre,lang,cond,price,city,
+    emoji:selectedEmoji,bg:COVER_BG[eidx>=0?eidx:0],desc,wa,
+    sellerId:s.id,sellerName:s.name,date:Date.now(),status:'active'
+  };
+  books.unshift(b);saveBooks(books);
+  // reset form
+  ['sTitle','sAuthor','sPrice','sDesc','sWA'].forEach(id=>document.getElementById(id).value='');
+  ['sGenre','sCond','sSellCity'].forEach(id=>document.getElementById(id).value='');
+  toast('📚 Book listed successfully!');
+  showPage('dashboard');
+}
+
+// ══════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════
+function renderDashboard(){
+  const s=getSession();if(!s)return;
+  const books=getBooks().filter(b=>b.sellerId===s.id);
+  document.getElementById('dashTitle').textContent='Welcome, '+s.name.split(' ')[0]+'!';
+  const active=books.filter(b=>b.status==='active').length;
+  const sold=books.filter(b=>b.status==='sold').length;
+  const revenue=books.filter(b=>b.status==='sold').reduce((a,b)=>a+b.price,0);
+  document.getElementById('dashStats').innerHTML=`
+    <div class="ds-card"><div class="ds-num">${books.length}</div><div class="ds-label">Total Listings</div></div>
+    <div class="ds-card"><div class="ds-num">${active}</div><div class="ds-label">Active</div></div>
+    <div class="ds-card"><div class="ds-num">${sold}</div><div class="ds-label">Sold</div></div>
+    <div class="ds-card"><div class="ds-num">PKR ${revenue.toLocaleString()}</div><div class="ds-label">Revenue Earned</div></div>`;
+  switchDashTab('listings',document.querySelector('.dash-tab.active'));
+}
+function switchDashTab(tab,el){
+  document.querySelectorAll('.dash-tab').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');
+  const s=getSession();
+  const c=document.getElementById('dashContent');
+  if(tab==='listings'){
+    const books=getBooks().filter(b=>b.sellerId===s.id).sort((a,b)=>b.date-a.date);
+    if(!books.length){c.innerHTML=`<div class="empty"><div class="e-icon">📚</div><p>No listings yet. <a href="#" onclick="showPage('sell');return false;">Add your first book!</a></p></div>`;return;}
+    c.innerHTML=books.map(b=>`
+      <div class="listing-row">
+        <div class="lr-cover">${b.emoji||'📚'}</div>
+        <div class="lr-info"><div class="lr-title">${b.title}</div><div class="lr-meta">${b.author} · ${b.city} · ${b.genre}</div></div>
+        <span class="lr-price">PKR ${b.price}</span>
+        <span class="lr-status status-${b.status}">${b.status}</span>
+        <div class="lr-actions">
+          ${b.status==='active'?`<button class="btn btn-amber btn-sm" onclick="markSold(${b.id})">Mark Sold</button>`:''}
+          <button class="btn btn-red btn-sm" onclick="deleteListing(${b.id})">Delete</button>
+        </div>
+      </div>`).join('');
+  } else {
+    c.innerHTML=`<div class="sell-card" style="background:#fff;border-radius:18px;padding:28px;box-shadow:0 4px 20px rgba(92,61,46,.1);">
+      <div class="form-row">
+        <div class="form-group"><label>Full Name</label><input value="${s.name}" id="pName"/></div>
+        <div class="form-group"><label>Email</label><input value="${s.email}" disabled style="opacity:.6"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone / WhatsApp</label><input value="${s.phone||''}" id="pPhone"/></div>
+        <div class="form-group"><label>City</label><select id="pCity">
+          ${['Lahore','Karachi','Islamabad','Rawalpindi','Peshawar','Faisalabad'].map(c=>`<option ${c===s.city?'selected':''}>${c}</option>`).join('')}
+        </select></div>
+      </div>
+      <button class="btn btn-amber" onclick="saveProfile()">Save Changes</button>
+    </div>`;
+  }
+}
+function markSold(id){
+  const books=getBooks();const i=books.findIndex(b=>b.id===id);
+  if(i>=0){books[i].status='sold';saveBooks(books);}
+  toast('Marked as sold!');renderDashboard();
+}
+function deleteListing(id){
+  if(!confirm('Delete this listing?'))return;
+  const books=getBooks().filter(b=>b.id!==id);saveBooks(books);
+  toast('Listing deleted.');renderDashboard();
+}
+function saveProfile(){
+  const s=getSession();const users=getUsers();
+  const i=users.findIndex(u=>u.id===s.id);
+  if(i>=0){
+    users[i].name=document.getElementById('pName').value;
+    users[i].phone=document.getElementById('pPhone').value;
+    users[i].city=document.getElementById('pCity').value;
+    saveUsers(users);saveSession(users[i]);updateNav();
+    toast('Profile updated!');
+  }
+}
+
+// ══════════════════════════════════════
+//  ADMIN
+// ══════════════════════════════════════
+function renderAdmin(){
+  const s=getSession();if(!s||s.role!=='admin'){toast('Admin access only');showPage('home');return;}
+  const books=getBooks();const users=getUsers();
+  const active=books.filter(b=>b.status==='active').length;
+  const sold=books.filter(b=>b.status==='sold').length;
+  const rev=books.filter(b=>b.status==='sold').reduce((a,b)=>a+b.price*.07,0);
+  document.getElementById('adminStats').innerHTML=`
+    <div class="ag-card"><div class="ag-num" style="color:var(--amber)">${books.length}</div><div class="ag-label">Total Listings</div></div>
+    <div class="ag-card"><div class="ag-num" style="color:var(--green)">${active}</div><div class="ag-label">Active</div></div>
+    <div class="ag-card"><div class="ag-num" style="color:var(--red)">${sold}</div><div class="ag-label">Sold</div></div>
+    <div class="ag-card"><div class="ag-num" style="color:var(--blue)">${users.length}</div><div class="ag-label">Users</div></div>
+    <div class="ag-card"><div class="ag-num" style="color:var(--green)">PKR ${Math.round(rev).toLocaleString()}</div><div class="ag-label">Commission (7%)</div></div>`;
+  switchAdminTab('listings',document.querySelector('.admin-tab.active'));
+}
+function switchAdminTab(tab,el){
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');
+  const c=document.getElementById('adminContent');
+  if(tab==='listings'){
+    const books=getBooks().sort((a,b)=>b.date-a.date);
+    c.innerHTML=`<table><thead><tr><th>Book</th><th>Seller</th><th>City</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+    ${books.map(b=>`<tr>
+      <td>${b.emoji} <strong>${b.title}</strong><br/><small style="color:var(--muted)">${b.author}</small></td>
+      <td>${b.sellerName||'—'}</td><td>${b.city}</td><td>PKR ${b.price}</td>
+      <td><span class="lr-status status-${b.status}">${b.status}</span></td>
+      <td><div class="tbl-action">
+        <button class="btn btn-red btn-sm" onclick="adminDelete(${b.id})">Remove</button>
+      </div></td>
+    </tr>`).join('')}
+    </tbody></table>`;
+  } else if(tab==='users'){
+    const users=getUsers();
+    c.innerHTML=`<table><thead><tr><th>Name</th><th>Email</th><th>City</th><th>Role</th><th>Phone</th></tr></thead><tbody>
+    ${users.map(u=>`<tr>
+      <td><strong>${u.name}</strong></td><td>${u.email}</td><td>${u.city||'—'}</td>
+      <td><span class="lr-status ${u.role==='admin'?'status-pending':'status-active'}">${u.role}</span></td>
+      <td>${u.phone||'—'}</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+  } else {
+    const books=getBooks().filter(b=>b.status==='sold');
+    const total=books.reduce((a,b)=>a+b.price,0);
+    const comm=total*.07;
+    c.innerHTML=`<div style="background:#fff;border-radius:14px;padding:28px;box-shadow:0 3px 14px rgba(92,61,46,.08);">
+      <h3 style="color:var(--brown);margin-bottom:20px;font-family:'Playfair Display',serif;">Revenue Summary</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;">
+        <div class="ds-card"><div class="ds-num">PKR ${total.toLocaleString()}</div><div class="ds-label">Total GMV (Sold Books)</div></div>
+        <div class="ds-card"><div class="ds-num">PKR ${Math.round(comm).toLocaleString()}</div><div class="ds-label">Kitabi Commission (7%)</div></div>
+        <div class="ds-card"><div class="ds-num">${books.length}</div><div class="ds-label">Completed Transactions</div></div>
+      </div>
+      <table><thead><tr><th>Book</th><th>Seller</th><th>Sale Price</th><th>Commission</th></tr></thead><tbody>
+      ${books.map(b=>`<tr><td>${b.emoji} ${b.title}</td><td>${b.sellerName}</td><td>PKR ${b.price}</td><td>PKR ${Math.round(b.price*.07)}</td></tr>`).join('')}
+      </tbody></table>
+    </div>`;
+  }
+}
+function adminDelete(id){
+  if(!confirm('Remove this listing?'))return;
+  const books=getBooks().filter(b=>b.id!==id);saveBooks(books);
+  toast('Listing removed.');renderAdmin();
+}
+
+// ══════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+seedData();
+updateNav();
+renderHome();
+</script>
+</body>
+</html>
